@@ -1,10 +1,12 @@
+using System.Runtime.InteropServices;
+
 namespace DesafioFundamentos.Models
 {
     public class Estacionamento
     {
         private decimal precoInicial = 0;
         private decimal precoPorHora = 0;
-        private List<string> veiculos = new List<string>();
+        private List<Veiculo> veiculos = new List<Veiculo>();
 
         public Estacionamento(decimal precoInicial, decimal precoPorHora)
         {
@@ -14,9 +16,23 @@ namespace DesafioFundamentos.Models
 
         public void AdicionarVeiculo()
         {
-            // TODO: Pedir para o usuário digitar uma placa (ReadLine) e adicionar na lista "veiculos"
-            // *IMPLEMENTE AQUI*
-            Console.WriteLine("Digite a placa do veículo para estacionar:");
+            Console.WriteLine("Informe o tipo do  veículo que deseja estacionar:");
+            Console.WriteLine($"1 - {EnmTipoVeiculoExtensions.GetDescription(EnmTipoVeiculo.Carro)}");
+            Console.WriteLine($"2 - {EnmTipoVeiculoExtensions.GetDescription(EnmTipoVeiculo.Moto)}");
+            Console.WriteLine($"3 - {EnmTipoVeiculoExtensions.GetDescription(EnmTipoVeiculo.Caminhao)}");
+
+            var tipoVeiculo = int.Parse(Console.ReadLine() ?? "0");
+            var tipoVeiculoEnum = (EnmTipoVeiculo)tipoVeiculo;
+
+            Console.WriteLine("Digite a placa do veículo:");
+            // Pedir para o usuário digitar a placa e armazenar na variável placa
+            var placa = Console.ReadLine().ToUpper() ?? "";
+
+            Console.WriteLine("Informe a Hora de entrada do veículo (formato HH:mm):");
+            var horaEntrada = TimeOnly.Parse(Console.ReadLine() ?? "00:00");
+
+            var veiculo = VeiculoFactory.CriarVeiculo(tipoVeiculoEnum, placa, precoInicial, precoPorHora, horaEntrada);
+            veiculos.Add(veiculo);
         }
 
         public void RemoverVeiculo()
@@ -25,28 +41,28 @@ namespace DesafioFundamentos.Models
 
             // Pedir para o usuário digitar a placa e armazenar na variável placa
             // *IMPLEMENTE AQUI*
-            string placa = "";
+            string placa = Console.ReadLine() ?? "";
 
-            // Verifica se o veículo existe
-            if (veiculos.Any(x => x.ToUpper() == placa.ToUpper()))
+            var veiculo = veiculos.FirstOrDefault(x => x.Placa.ToUpper() == placa.ToUpper());
+            if (veiculo != null)
             {
-                Console.WriteLine("Digite a quantidade de horas que o veículo permaneceu estacionado:");
+                Console.WriteLine($"Informe a hora de saída do veículo {placa} (formato HH:mm):");
+                TimeOnly horaSaida = TimeOnly.Parse(Console.ReadLine() ?? "00:00");
 
-                // TODO: Pedir para o usuário digitar a quantidade de horas que o veículo permaneceu estacionado,
-                // TODO: Realizar o seguinte cálculo: "precoInicial + precoPorHora * horas" para a variável valorTotal                
-                // *IMPLEMENTE AQUI*
-                int horas = 0;
-                decimal valorTotal = 0; 
+                // Calcula o total devido
+                veiculo.HoraSaida = horaSaida;
 
-                // TODO: Remover a placa digitada da lista de veículos
-                // *IMPLEMENTE AQUI*
+                // Exibe o valor total devido
+                Console.WriteLine(veiculo.ToString());
 
-                Console.WriteLine($"O veículo {placa} foi removido e o preço total foi de: R$ {valorTotal}");
+                // Remove o veículo da lista
+                veiculos.Remove(veiculo);
             }
             else
             {
-                Console.WriteLine("Desculpe, esse veículo não está estacionado aqui. Confira se digitou a placa corretamente");
+                Console.WriteLine("Veículo não encontrado.");
             }
+
         }
 
         public void ListarVeiculos()
@@ -55,8 +71,10 @@ namespace DesafioFundamentos.Models
             if (veiculos.Any())
             {
                 Console.WriteLine("Os veículos estacionados são:");
-                // TODO: Realizar um laço de repetição, exibindo os veículos estacionados
-                // *IMPLEMENTE AQUI*
+                veiculos.ForEach(veiculo =>
+                {
+                    Console.WriteLine(veiculo.DadosVeiculo);
+                });
             }
             else
             {
